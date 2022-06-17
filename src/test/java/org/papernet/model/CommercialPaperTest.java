@@ -45,6 +45,10 @@ public class CommercialPaperTest {
 	
 	@Test
 	void getKey() {
+		CommercialPaper commercialPaper = CommercialPaper.builder()
+		                                                 .issuer("John")
+		                                                 .paperNo("0001")
+		                                                 .build();
 		System.out.println(commercialPaper.getKey());
 	}
 }

@@ -19,6 +19,7 @@ public class CommercialPaperContext extends Context implements Repository<Commer
 		stub.putState(commercialPaper.getKey(),
 		              commercialPaper.toJSON()
 		                             .getBytes(StandardCharsets.UTF_8));
+		
 		return commercialPaper;
 	}
 	

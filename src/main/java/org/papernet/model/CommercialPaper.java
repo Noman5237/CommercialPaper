@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.*;
 import org.hyperledger.fabric.contract.annotation.DataType;
 import org.hyperledger.fabric.contract.annotation.Property;
+import org.papernet.util.State;
 
 import java.util.Date;
 
@@ -14,7 +15,7 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CommercialPaper {
+public class CommercialPaper implements State {
 	
 	@Property
 	private String issuer;
