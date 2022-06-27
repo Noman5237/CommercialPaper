@@ -1,0 +1,20 @@
+PeerOrgs:
+  - Name: MagnetoCorp
+    Domain: magnetocorp.com
+    Specs:
+      - Hostname: magnetocorp-dev-peer
+        CommonName: magnetocorp-dev-peer
+    Template:
+      Count: 2
+    Users:
+      Count: 2
+
+  - Name: DigiBank 
+    Domain: digibank.com
+    Specs:
+      - Hostname: digibank-dev-peer
+        CommonName: digibank-dev-peer
+    Template:
+      Count: 2
+    Users:
+      Count: 2

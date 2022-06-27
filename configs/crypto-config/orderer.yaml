@@ -1,0 +1,5 @@
+OrdererOrgs:
+  - Name: Orderer
+    Domain: magnetocorp.com
+    Specs:
+      - Hostname: orderer
