@@ -1,0 +1,75 @@
+#!/usr/bin/node
+
+const path = require('path');
+const fs = require('fs');
+const { Command } = require('commander');
+const { runCommands, cleanFiles, PATHS } = require('../utils.js');
+
+const main = () => {
+	const program = new Command();
+
+	program.option('-c --clean', 'cleans the output of this script');
+	program.parse(process.argv);
+
+	if (program.opts().clean) {
+		clean();
+	} else {
+		setup();
+	}
+};
+
+const ARTIFACTS_CONFIGTX = path.join(PATHS.ARTIFACTS, '/configtx');
+const CONFIGS_CONFIGTX = path.join(PATHS.CONFIGS, '/configtx');
+
+const ARTIFACTS = {
+	GENESIS_BLOCK: path.join(
+		ARTIFACTS_CONFIGTX,
+		'magnetocorp-orderer-genesis.block'
+	),
+	GENESIS_BLOCK_INFO: path.join(
+		ARTIFACTS_CONFIGTX,
+		'magnetocorp-orderer-genesis-info.json'
+	),
+};
+
+/**
+// # Generate the orderer genesis block and its inspection
+// configtxgen -configPath $PWD/configs/configtx -outputBlock $PWD/artifacts/configtx/magnetocorp-orderer-genesis.block -profile MagnetoCorpOrdererGenesis -channelID orderer-system-channel
+// pushd $PWD/artifacts/configtx
+// configtxgen -inspectBlock magnetocorp-orderer-genesis.block > magnetocorp-orderer-genesis-info.json
+// popd
+ */
+const setup = () => {
+	let commands = [
+		`configtxgen -configPath ${CONFIGS_CONFIGTX} -outputBlock ${ARTIFACTS.GENESIS_BLOCK} -profile MagnetoCorpOrdererGenesis -channelID orderer-system-channel`,
+		`configtxgen -inspectBlock ${ARTIFACTS.GENESIS_BLOCK}`,
+	];
+
+	try {
+		runCommands(commands.slice(0, 1));
+
+		const writeStream = fs.createWriteStream(ARTIFACTS.GENESIS_BLOCK_INFO);
+		writeStream.on('open', () => {
+			runCommands(commands.slice(1), ['inherit', writeStream, 'inherit']);
+			writeStream.close();
+		});
+
+		console.log('Artifacts generated');
+	} catch (err) {
+		console.log(err);
+	}
+};
+
+/**
+// # Cleaning up the orderer genesis block and its inspection
+ */
+const clean = () => {
+	try {
+		cleanFiles(Object.values(ARTIFACTS));
+		console.log('Artifacts cleaned');
+	} catch (err) {
+		console.log(err);
+	}
+};
+
+main();

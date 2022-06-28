@@ -1,0 +1,63 @@
+#!/usr/bin/node
+
+const path = require('path');
+const { Command } = require('commander');
+const { runCommands, cleanFiles, PATHS } = require('../utils.js');
+
+const main = () => {
+	const program = new Command();
+
+	program.option('-c --clean', 'cleans the output of this script');
+	program.parse(process.argv);
+
+	if (program.opts().clean) {
+		clean();
+	} else {
+		setup();
+	}
+};
+
+const ARTIFACTS_CRYPTO_CONFIG = path.join(PATHS.ARTIFACTS, '/crypto-config');
+const CONFIGS_CRYPTO_CONFIG = path.join(PATHS.CONFIGS, '/crypto-config');
+
+const ARTIFACTS = {
+	MAGNETOCORP_ORDERER: path.join(
+		ARTIFACTS_CRYPTO_CONFIG,
+		'ordererOrganizations/',
+		'magnetocorp.com/'
+	),
+};
+
+/**
+// # Generate networks first orderer crypto
+// cryptogen generate --output=$PWD/artifacts/crypto-config --config=$PWD/configs/crypto-config/orderer.yaml
+ */
+const setup = () => {
+	let commands = [
+		`cryptogen generate --output=${ARTIFACTS_CRYPTO_CONFIG} --config=${path.join(
+			CONFIGS_CRYPTO_CONFIG,
+			'magnetocorp-orderer.yaml'
+		)}`,
+	];
+
+	try {
+		runCommands(commands);
+		console.log('Artifacts generated');
+	} catch (err) {
+		console.log(err);
+	}
+};
+
+/**
+// # Cleaning up the orderer genesis block and its inspection
+ */
+const clean = () => {
+	try {
+		cleanFiles(Object.values(ARTIFACTS));
+		console.log('Artifacts cleaned');
+	} catch (err) {
+		console.log(err);
+	}
+};
+
+main();

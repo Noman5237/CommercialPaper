@@ -1,0 +1,36 @@
+#!/usr/bin/node
+
+const path = require('path');
+const { Command } = require('commander');
+const { cleanFiles, PATHS } = require('../utils.js');
+
+const main = () => {
+	const program = new Command();
+	program.argument('<domains...>', 'list of organization domains');
+	program.parse(process.argv);
+
+	clean(program.args);
+};
+
+const ARTIFACTS_CRYPTO_CONFIG_PEERS = path.join(
+	PATHS.ARTIFACTS,
+	'crypto-config/',
+	'peerOrganizations/'
+);
+
+/**
+// # Cleaning up the orderer genesis block and its inspection
+ */
+const clean = (peerDomains) => {
+	try {
+		const peerDirectories = peerDomains.map((domain) =>
+			path.join(ARTIFACTS_CRYPTO_CONFIG_PEERS, domain)
+		);
+		cleanFiles(peerDirectories);
+		console.log('Artifacts cleaned');
+	} catch (err) {
+		console.log(err);
+	}
+};
+
+main();

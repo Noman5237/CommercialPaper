@@ -1,0 +1,75 @@
+#!/usr/bin/node
+
+const path = require('path');
+const fs = require('fs');
+const { Command } = require('commander');
+const { runCommands, cleanFiles, PATHS } = require('../utils.js');
+
+const main = () => {
+	const program = new Command();
+
+	program.option('-c --clean', 'cleans the output of this script');
+	program.parse(process.argv);
+
+	if (program.opts().clean) {
+		clean();
+	} else {
+		setup();
+	}
+};
+
+const ARTIFACTS_CONFIGTX = path.join(PATHS.ARTIFACTS, '/configtx');
+const CONFIGS_CONFIGTX = path.join(PATHS.CONFIGS, '/configtx');
+
+const ARTIFACTS = {
+	CHANNEL_TX: path.join(
+		ARTIFACTS_CONFIGTX,
+		'magnetocorp-channel.tx'
+	),
+	CHANNEL_TX_INFO: path.join(
+		ARTIFACTS_CONFIGTX,
+		'magnetocorp-channel-info.json'
+	),
+};
+
+/**
+// # Generate the orderer genesis block and its inspection
+// configtxgen -configPath $PWD/configs/configtx -outputCreateChannelTx $PWD/artifacts/configtx/magnetocorp-channel.tx -profile MagnetoCorpChannel -channelID magnetocorp-channel
+// pushd $PWD/artifacts/configtx
+// configtxgen -inspectChannelCreateTx magnetocorp-channel.tx > magnetocorp-channel-info.json
+// popd
+ */
+const setup = () => {
+	let commands = [
+		`configtxgen -configPath ${CONFIGS_CONFIGTX} -outputCreateChannelTx ${ARTIFACTS.CHANNEL_TX} -profile MagnetoCorpChannel -channelID magnetocorp-channel`,
+		`configtxgen -inspectChannelCreateTx ${ARTIFACTS.CHANNEL_TX}`,
+	];
+
+	try {
+		runCommands(commands.slice(0, 1));
+
+		const writeStream = fs.createWriteStream(ARTIFACTS.CHANNEL_TX_INFO);
+		writeStream.on('open', () => {
+			runCommands(commands.slice(1), ['inherit', writeStream, 'inherit']);
+			writeStream.close();
+		});
+
+		console.log('Artifacts generated');
+	} catch (err) {
+		console.log(err);
+	}
+};
+
+/**
+// # Cleaning up the orderer genesis block and its inspection
+ */
+const clean = () => {
+	try {
+		cleanFiles(Object.values(ARTIFACTS));
+		console.log('Artifacts cleaned');
+	} catch (err) {
+		console.log(err);
+	}
+};
+
+main();
