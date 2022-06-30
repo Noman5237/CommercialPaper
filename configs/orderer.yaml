@@ -1,0 +1,120 @@
+################################################################################
+#
+#   Orderer Configuration
+#
+#   - This controls the type and configuration of the orderer.
+#
+################################################################################
+General:
+  ListenAddress: 127.0.0.1
+  ListenPort: 7050
+  TLS:
+    Enabled: true
+    PrivateKey: ../artifacts/crypto-config/ordererOrganizations/magnetocorp.com/orderers/orderer.magnetocorp.com/tls/server.key
+    Certificate: ../artifacts/crypto-config/ordererOrganizations/magnetocorp.com/orderers/orderer.magnetocorp.com/tls/server.crt
+    # It is not required to be set, but can be used to augment the set of TLS CA certificates
+    # available from the MSPs of each channel’s configuration.
+    RootCAs:
+      - ../artifacts/crypto-config/ordererOrganizations/magnetocorp.com/orderers/orderer.magnetocorp.com/tls/ca.crt
+    # Require client certificates / mutual TLS for inbound connections.
+    ClientAuthRequired: true
+    # If mutual TLS is enabled, ClientRootCAs contains a list of additional root certificates
+    # used for verifying certificates of client connections.
+    # It is not required to be set, but can be used to augment the set of TLS CA certificates
+    # available from the MSPs of each channel’s configuration.
+    ClientRootCAs:
+      - ../artifacts/crypto-config/peerOrganizations/digibank.com/msp/tlscacerts/tlsca.digibank.com-cert.pem
+      - ../artifacts/crypto-config/peerOrganizations/magnetocorp.com/msp/tlscacerts/tlsca.magnetocorp.com-cert.pem
+
+  Keepalive:
+    ServerMinInterval: 60s
+    ServerInterval: 7200s
+    ServerTimeout: 20s
+
+  MaxRecvMsgSize: 47185920
+  MaxSendMsgSize: 47185920
+  BootstrapMethod: file
+  BootstrapFile: ../artifacts/configtx/magnetocorp-orderer-genesis.block
+  LocalMSPDir: ../artifacts/crypto-config/ordererOrganizations/magnetocorp.com/orderers/orderer.magnetocorp.com/msp
+  LocalMSPID: OrdererMSP
+
+  BCCSP:
+    Default: SW
+    SW:
+      # TODO: The default Hash and Security level needs refactoring to be
+      # fully configurable. Changing these defaults requires coordination
+      # SHA2 is hardcoded in several places, not only BCCSP
+      Hash: SHA2
+      Security: 256
+      FileKeyStore:
+        KeyStore:
+
+  # Authentication contains configuration parameters related to authenticating
+  # client messages
+  Authentication:
+    # the acceptable difference between the current server time and the
+    # client's time as specified in a client request message
+    TimeWindow: 20s
+
+################################################################################
+#
+#   SECTION: File Ledger
+#
+#   - This section applies to the configuration of the file ledger.
+#
+################################################################################
+FileLedger:
+  Location: ../artifacts/orderers/magnetocorp.com/orderer.magnetocorp.com/ledger
+
+################################################################################
+#
+#   Debug Configuration
+#
+#   - This controls the debugging options for the orderer
+#
+################################################################################
+Debug:
+  # BroadcastTraceDir when set will cause each request to the Broadcast service
+  # for this orderer to be written to a file in this directory
+  BroadcastTraceDir: ../artifacts/orderers/magnetocorp.com/orderer.magnetocorp.com/traces/broadcast
+
+  # DeliverTraceDir when set will cause each request to the Deliver service
+  # for this orderer to be written to a file in this directory
+  DeliverTraceDir: ../artifacts/orderers/magnetocorp.com/orderer.magnetocorp.com/traces/deliver
+
+################################################################################
+#
+#   Operations Configuration
+#
+#   - This configures the operations server endpoint for the orderer
+#
+################################################################################
+Operations:
+  ListenAddress: 127.0.0.1:8443
+
+  # TLS configuration for the operations endpoint (must be enabled if operations required)
+  TLS:
+    Enabled: true
+    PrivateKey: artifacts/crypto-config/ordererOrganizations/magnetocorp.com/orderers/orderer.magnetocorp.com/tls/server.key
+    Certificate: artifacts/crypto-config/ordererOrganizations/magnetocorp.com/orderers/orderer.magnetocorp.com/tls/server.crt
+    # Most operations service endpoints require client authentication when TLS
+    # is enabled. ClientAuthRequired requires client certificate authentication
+    # at the TLS layer to access all resources.
+    ClientAuthRequired: true
+
+    # Paths to PEM encoded ca certificates to trust for client authentication
+    ClientRootCAs:
+      - artifacts/crypto-config/ordererOrganizations/magnetocorp.com/msp/tlscacerts/tlsca.magnetocorp.com-cert.pem
+      - artifacts/crypto-config/peerOrganizations/digibank.com/msp/tlscacerts/tlsca.digibank.com-cert.pem
+      - artifacts/crypto-config/peerOrganizations/magnetocorp.com/msp/tlscacerts/tlsca.magnetocorp.com-cert.pem
+
+################################################################################
+#
+#   Metrics Configuration
+#
+#   - This configures metrics collection for the orderer
+#
+################################################################################
+Metrics:
+  # The metrics provider is one of statsd, prometheus, or disabled
+  Provider: prometheus

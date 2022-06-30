@@ -25,7 +25,7 @@ const runCommands = (commands, stdio = 'inherit') => {
 
 const cleanFiles = (files) => {
 	const commands = files
-		.filter((file) => fs.statSync(file))
+		.filter((file) => fs.existsSync(file))
 		.map((file) => `rm ${fs.statSync(file).isDirectory ? '-rf' : ''} ${file}`);
 
 	runCommands(commands);

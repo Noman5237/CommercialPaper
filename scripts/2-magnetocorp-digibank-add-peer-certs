@@ -1,14 +1,13 @@
 #!/usr/bin/node
 
 const path = require('path');
-const { runCommands, PATHS } = require('../utils.js');
+const { runCommands, PATHS } = require('./utils.js');
 
 const main = () => {
 	setup();
 };
 
 const ARTIFACTS_CRYPTO_CONFIG = path.join(PATHS.ARTIFACTS, '/crypto-config');
-const CONFIGS_CRYPTO_CONFIG = path.join(PATHS.CONFIGS, '/crypto-config');
 
 /**
 // # Generate networks peer organizations
@@ -17,8 +16,8 @@ const CONFIGS_CRYPTO_CONFIG = path.join(PATHS.CONFIGS, '/crypto-config');
 const setup = () => {
 	let commands = [
 		`cryptogen extend --input=${ARTIFACTS_CRYPTO_CONFIG} --config=${path.join(
-			CONFIGS_CRYPTO_CONFIG,
-			'magnetocorp-digibank-peers.yaml'
+			PATHS.CONFIGS,
+			'crypto-magnetocorp-digibank-peers.yaml'
 		)}`,
 	];
 

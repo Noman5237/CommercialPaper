@@ -10,7 +10,7 @@ Organizations:
   - &Orderer
     Name: Orderer
     ID: OrdererMSP
-    MSPDir: ../../artifacts/crypto-config/ordererOrganizations/magnetocorp.com/msp
+    MSPDir: ../artifacts/crypto-config/ordererOrganizations/magnetocorp.com/msp
     Policies:
       Readers:
         Type: Signature
@@ -23,12 +23,12 @@ Organizations:
         Rule: "OR('OrdererMSP.admin')"
 
     OrdererEndpoints:
-      - "localhost:7050"
+      - "127.0.0.1:7050"
 
   - &MagnetoCorp
     Name: MagnetoCorp
     ID: MagnetoCorpMSP
-    MSPDir: ../../artifacts/crypto-config/peerOrganizations/magnetocorp.com/msp
+    MSPDir: ../artifacts/crypto-config/peerOrganizations/magnetocorp.com/msp
     Policies:
       Readers:
         Type: Signature
@@ -43,13 +43,10 @@ Organizations:
         Type: Signature
         Rule: "OR('MagnetoCorpMSP.peer')"
 
-    OrdererEndpoints:
-      - "localhost:7050"
-
   - &DigiBank
     Name: DigiBank
     ID: DigiBankMSP
-    MSPDir: ../../artifacts/crypto-config/peerOrganizations/digibank.com/msp
+    MSPDir: ../artifacts/crypto-config/peerOrganizations/digibank.com/msp
     Policies:
       Readers:
         Type: Signature
@@ -108,7 +105,7 @@ Orderer: &OrdererDefaults
     MaxMessageCount: 10
     AbsoluteMaxBytes: 45 MB
     PreferredMaxBytes: 512 KB
-
+  
   Policies:
     Readers:
       Type: ImplicitMeta
@@ -122,6 +119,10 @@ Orderer: &OrdererDefaults
     BlockValidation:
       Type: ImplicitMeta
       Rule: "ANY Writers"
+
+  Capabilities:
+    <<: *OrdererCapabilities
+
 
 ################################################################################
 #

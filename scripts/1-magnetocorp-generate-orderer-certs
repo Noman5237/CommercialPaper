@@ -2,7 +2,7 @@
 
 const path = require('path');
 const { Command } = require('commander');
-const { runCommands, cleanFiles, PATHS } = require('../utils.js');
+const { runCommands, cleanFiles, PATHS } = require('./utils.js');
 
 const main = () => {
 	const program = new Command();
@@ -18,7 +18,6 @@ const main = () => {
 };
 
 const ARTIFACTS_CRYPTO_CONFIG = path.join(PATHS.ARTIFACTS, '/crypto-config');
-const CONFIGS_CRYPTO_CONFIG = path.join(PATHS.CONFIGS, '/crypto-config');
 
 const ARTIFACTS = {
 	MAGNETOCORP_ORDERER: path.join(
@@ -35,8 +34,8 @@ const ARTIFACTS = {
 const setup = () => {
 	let commands = [
 		`cryptogen generate --output=${ARTIFACTS_CRYPTO_CONFIG} --config=${path.join(
-			CONFIGS_CRYPTO_CONFIG,
-			'magnetocorp-orderer.yaml'
+			PATHS.CONFIGS,
+			'crypto-magnetocorp-orderer.yaml'
 		)}`,
 	];
 

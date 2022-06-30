@@ -2,14 +2,15 @@
 
 const path = require('path');
 const { Command } = require('commander');
-const { cleanFiles, PATHS } = require('../utils.js');
+const { cleanFiles, PATHS } = require('./utils.js');
 
 const main = () => {
 	const program = new Command();
-	program.argument('<domains...>', 'list of organization domains');
+	program.argument('[domains...]', 'list of organization domains');
+	program.option('-a --all', 'clean all domains');
 	program.parse(process.argv);
 
-	clean(program.args);
+	clean(program.args, program.opts().all);
 };
 
 const ARTIFACTS_CRYPTO_CONFIG_PEERS = path.join(
@@ -21,11 +22,14 @@ const ARTIFACTS_CRYPTO_CONFIG_PEERS = path.join(
 /**
 // # Cleaning up the orderer genesis block and its inspection
  */
-const clean = (peerDomains) => {
+const clean = (peerDomains, all) => {
 	try {
-		const peerDirectories = peerDomains.map((domain) =>
-			path.join(ARTIFACTS_CRYPTO_CONFIG_PEERS, domain)
-		);
+		let peerDirectories = [ARTIFACTS_CRYPTO_CONFIG_PEERS];
+		if (!all) {
+			peerDirectories = peerDomains.map((domain) =>
+				path.join(ARTIFACTS_CRYPTO_CONFIG_PEERS, domain)
+			);
+		}
 		cleanFiles(peerDirectories);
 		console.log('Artifacts cleaned');
 	} catch (err) {

@@ -3,7 +3,7 @@
 const path = require('path');
 const fs = require('fs');
 const { Command } = require('commander');
-const { runCommands, cleanFiles, PATHS } = require('../utils.js');
+const { runCommands, cleanFiles, PATHS } = require('./utils.js');
 
 const main = () => {
 	const program = new Command();
@@ -19,36 +19,35 @@ const main = () => {
 };
 
 const ARTIFACTS_CONFIGTX = path.join(PATHS.ARTIFACTS, '/configtx');
-const CONFIGS_CONFIGTX = path.join(PATHS.CONFIGS, '/configtx');
 
 const ARTIFACTS = {
-	GENESIS_BLOCK: path.join(
+	CHANNEL_TX: path.join(
 		ARTIFACTS_CONFIGTX,
-		'magnetocorp-orderer-genesis.block'
+		'magnetocorp-channel.tx'
 	),
-	GENESIS_BLOCK_INFO: path.join(
+	CHANNEL_TX_INFO: path.join(
 		ARTIFACTS_CONFIGTX,
-		'magnetocorp-orderer-genesis-info.json'
+		'magnetocorp-channel-info.json'
 	),
 };
 
 /**
 // # Generate the orderer genesis block and its inspection
-// configtxgen -configPath $PWD/configs/configtx -outputBlock $PWD/artifacts/configtx/magnetocorp-orderer-genesis.block -profile MagnetoCorpOrdererGenesis -channelID orderer-system-channel
+// configtxgen -configPath $PWD/configs/configtx -outputCreateChannelTx $PWD/artifacts/configtx/magnetocorp-channel.tx -profile MagnetoCorpChannel -channelID magnetocorp-channel
 // pushd $PWD/artifacts/configtx
-// configtxgen -inspectBlock magnetocorp-orderer-genesis.block > magnetocorp-orderer-genesis-info.json
+// configtxgen -inspectChannelCreateTx magnetocorp-channel.tx > magnetocorp-channel-info.json
 // popd
  */
 const setup = () => {
 	let commands = [
-		`configtxgen -configPath ${CONFIGS_CONFIGTX} -outputBlock ${ARTIFACTS.GENESIS_BLOCK} -profile MagnetoCorpOrdererGenesis -channelID orderer-system-channel`,
-		`configtxgen -inspectBlock ${ARTIFACTS.GENESIS_BLOCK}`,
+		`configtxgen -configPath ${PATHS.CONFIGS} -outputCreateChannelTx ${ARTIFACTS.CHANNEL_TX} -profile MagnetoCorpChannel -channelID magnetocorp-channel`,
+		`configtxgen -inspectChannelCreateTx ${ARTIFACTS.CHANNEL_TX}`,
 	];
 
 	try {
 		runCommands(commands.slice(0, 1));
 
-		const writeStream = fs.createWriteStream(ARTIFACTS.GENESIS_BLOCK_INFO);
+		const writeStream = fs.createWriteStream(ARTIFACTS.CHANNEL_TX_INFO);
 		writeStream.on('open', () => {
 			runCommands(commands.slice(1), ['inherit', writeStream, 'inherit']);
 			writeStream.close();
