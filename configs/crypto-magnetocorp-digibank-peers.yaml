@@ -1,6 +1,7 @@
 PeerOrgs:
   - Name: MagnetoCorp
     Domain: magnetocorp.com
+    EnableNodeOUs: true
     Specs:
       - Hostname: magnetocorp-dev-peer
         CommonName: magnetocorp-dev-peer
@@ -13,6 +14,7 @@ PeerOrgs:
 
   - Name: DigiBank 
     Domain: digibank.com
+    EnableNodeOUs: true
     Specs:
       - Hostname: digibank-dev-peer
         CommonName: digibank-dev-peer

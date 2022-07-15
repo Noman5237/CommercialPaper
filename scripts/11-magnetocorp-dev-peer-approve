@@ -1,0 +1,82 @@
+#!/usr/bin/node
+
+const path = require('path');
+const { Command } = require('commander');
+const { runCommands, PATHS } = require('./utils.js');
+
+const main = () => {
+	const program = new Command();
+
+	program.argument('<channelName>', 'name of the channel');
+	program.argument('<packageName>', 'name of the package');
+	program.argument('<packageVersion>', 'version of the package');
+	program.argument('<packageId>', 'id of the package');
+	program.argument('<sequence>', 'sequence of the package');
+	program.parse(process.argv);
+
+	setup(
+		program.args[0],
+		program.args[1],
+		program.args[2],
+		program.args[3],
+		program.args[4]
+	);
+};
+
+const CERTIFICATES = {
+	ORDERER_TLS_ROOTCERT_FILE: path.join(
+		PATHS.ARTIFACTS,
+		'crypto-config/ordererOrganizations/magnetocorp.com/orderers/orderer.magnetocorp.com/msp/tlscacerts/tlsca.magnetocorp.com-cert.pem'
+	),
+	CORE_PEER_TLS_KEY_FILE: path.join(
+		PATHS.ARTIFACTS,
+		'crypto-config/peerOrganizations/magnetocorp.com/peers/magnetocorp-dev-peer/tls/server.key'
+	),
+	CORE_PEER_TLS_CERT_FILE: path.join(
+		PATHS.ARTIFACTS,
+		'crypto-config/peerOrganizations/magnetocorp.com/peers/magnetocorp-dev-peer/tls/server.crt'
+	),
+	CORE_PEER_TLS_ROOT_CERT_FILE: path.join(
+		PATHS.ARTIFACTS,
+		'crypto-config/peerOrganizations/magnetocorp.com/peers/magnetocorp-dev-peer/tls/ca.crt'
+	),
+};
+
+/**
+// # Approve chain code from magnetocorp-dev-peer 
+// peer channel join \
+//  -b ${ARTIFACTS_CONFIGTX_CHANNEL_GENESIS} \
+//  -o 127.0.0.1:7050 \
+//  --tls --cafile ${ORDERER_TLS_ROOTCERT_FILE} \
+//  --clientauth --certfile ${CORE_PEER_TLS_CERT_FILE} \
+//  --keyfile ${CORE_PEER_TLS_KEY_FILE}
+ */
+const setup = (
+	channelName,
+	packageName,
+	packageVersion,
+	packageId,
+	sequence
+) => {
+	let commands = [
+		`peer lifecycle chaincode approveformyorg` +
+			` -C ${channelName}` +
+			` -n ${packageName}` +
+			` -v ${packageVersion}` +
+			` --package-id ${packageId}` +
+			` --sequence ${sequence}` +
+			` -o 127.0.0.1:7050` +
+			` --tls --cafile ${CERTIFICATES.ORDERER_TLS_ROOTCERT_FILE}` +
+			` --clientauth --certfile ${CERTIFICATES.CORE_PEER_TLS_CERT_FILE}` +
+			` --keyfile ${CERTIFICATES.CORE_PEER_TLS_KEY_FILE}`,
+	];
+
+	try {
+		runCommands(commands);
+		console.log('Artifacts generated');
+	} catch (err) {
+		console.log(err);
+	}
+};
+
+main();

@@ -8,6 +8,8 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
 import org.papernet.context.CommercialPaperContext;
 import org.papernet.model.CommercialPaper;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -44,15 +46,15 @@ public class CommercialPaperContract implements ContractInterface {
 	public CommercialPaper issue(CommercialPaperContext context,
 	                             String issuer,
 	                             String paperNo,
-	                             Date maturityTime,
-	                             int faceValue) {
+	                             String maturityTime,
+	                             int faceValue) throws ParseException {
 		
 		CommercialPaper commercialPaper = new CommercialPaper(issuer,
 		                                                      paperNo,
 		                                                      ISSUED,
 		                                                      faceValue,
 		                                                      new Date(),
-		                                                      maturityTime,
+		                                                      new SimpleDateFormat("yyyy-MM-dd").parse(maturityTime),
 		                                                      issuer);
 		
 		return context.save(commercialPaper);
