@@ -3,3 +3,6 @@ OrdererOrgs:
     Domain: magnetocorp.com
     Specs:
       - Hostname: orderer
+        SANS:
+          - localhost
+          - 127.0.0.1

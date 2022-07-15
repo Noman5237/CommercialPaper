@@ -4,6 +4,8 @@ PeerOrgs:
     Specs:
       - Hostname: magnetocorp-dev-peer
         CommonName: magnetocorp-dev-peer
+        SANS:
+          - 127.0.0.1
     Template:
       Count: 2
     Users:

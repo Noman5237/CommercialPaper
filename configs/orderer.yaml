@@ -23,6 +23,7 @@ General:
     # It is not required to be set, but can be used to augment the set of TLS CA certificates
     # available from the MSPs of each channel’s configuration.
     ClientRootCAs:
+      - ../artifacts/crypto-config/ordererOrganizations/magnetocorp.com/msp/tlscacerts/tlsca.magnetocorp.com-cert.pem
       - ../artifacts/crypto-config/peerOrganizations/digibank.com/msp/tlscacerts/tlsca.digibank.com-cert.pem
       - ../artifacts/crypto-config/peerOrganizations/magnetocorp.com/msp/tlscacerts/tlsca.magnetocorp.com-cert.pem
 

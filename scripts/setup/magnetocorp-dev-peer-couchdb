@@ -1,0 +1,2 @@
+# docker run --name magnetocorp-dev-peer-couchdb -v magnetocorp-dev-peer-couchdb:/opt/couchdb/data -e COUCHDB_USER=admin -e COUCHDB_PASSWORD=adminpw -p 5984:5984 -d couchdb
+docker start magnetocorp-dev-peer-couchdb

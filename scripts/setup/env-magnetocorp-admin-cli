@@ -1,0 +1,2 @@
+# Identity set to Admin
+export CORE_PEER_MSPCONFIGPATH=$PROJECT_ROOT/artifacts/crypto-config/peerOrganizations/magnetocorp.com/users/Admin@magnetocorp.com/msp

@@ -1,0 +1,49 @@
+#!/usr/bin/node
+
+const path = require('path');
+const { Command } = require('commander');
+const { runCommands, cleanFiles, PATHS } = require('./utils.js');
+
+const main = () => {
+	const program = new Command();
+
+	program.option('-c --clean', 'cleans the output of this script');
+	program.parse(process.argv);
+
+	if (program.opts().clean) {
+		clean();
+	} else {
+		setup();
+	}
+};
+
+const ARTIFACTS_ORDERER = path.join(
+	PATHS.ARTIFACTS,
+	'orderers/',
+	'magnetocorp.com/',
+	'orderer.magnetocorp.com/'
+);
+
+const setup = () => {
+	let commands = [`orderer start`];
+
+	try {
+		runCommands(commands);
+	} catch (err) {
+		console.log(err);
+	}
+};
+
+/**
+// # Cleaning up the orderer genesis block and its inspection
+ */
+const clean = () => {
+	try {
+		cleanFiles([ARTIFACTS_ORDERER]);
+		console.log('Artifacts cleaned');
+	} catch (err) {
+		console.log(err);
+	}
+};
+
+main();

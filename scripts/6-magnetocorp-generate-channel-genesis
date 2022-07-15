@@ -1,0 +1,102 @@
+#!/usr/bin/node
+
+const path = require('path');
+const fs = require('fs');
+const { Command } = require('commander');
+const { runCommands, cleanFiles, PATHS } = require('./utils.js');
+
+const main = () => {
+	const program = new Command();
+
+	program.option('-c --clean', 'cleans the output of this script');
+	program.parse(process.argv);
+
+	if (program.opts().clean) {
+		clean();
+	} else {
+		setup();
+	}
+};
+
+const ARTIFACTS_CONFIGTX = path.join(PATHS.ARTIFACTS, '/configtx');
+const ARTIFACTS_CONFIGTX_CHANNEL_TX = path.join(
+	ARTIFACTS_CONFIGTX,
+	'magnetocorp-channel.tx'
+);
+
+const ARTIFACTS = {
+	GENESIS_BLOCK: path.join(
+		ARTIFACTS_CONFIGTX,
+		'magnetocorp-channel-genesis.block'
+	),
+	GENESIS_BLOCK_INFO: path.join(
+		ARTIFACTS_CONFIGTX,
+		'magnetocorp-channel-genesis-info.json'
+	),
+};
+
+const CERTIFICATES = {
+	ORDERER_TLS_ROOTCERT_FILE: path.join(
+		PATHS.ARTIFACTS,
+		'crypto-config/ordererOrganizations/magnetocorp.com/orderers/orderer.magnetocorp.com/msp/tlscacerts/tlsca.magnetocorp.com-cert.pem'
+	),
+	CORE_PEER_TLS_KEY_FILE: path.join(
+		PATHS.ARTIFACTS,
+		'crypto-config/peerOrganizations/magnetocorp.com/peers/magnetocorp-dev-peer/tls/server.key'
+	),
+	CORE_PEER_TLS_CERT_FILE: path.join(
+		PATHS.ARTIFACTS,
+		'crypto-config/peerOrganizations/magnetocorp.com/peers/magnetocorp-dev-peer/tls/server.crt'
+	),
+};
+
+/**
+// # Generate the orderer genesis block and its inspection
+// peer channel create -c magnetocorp-channel -f ./artifacts/configtx/magnetocorp-channel.tx -o 127.0.0.1:7050 --outputBlock ./artifacts/configtx/magnetocorp-channel-genesis.block \
+// --tls --cafile $ORDERER_TLS_ROOTCERT_FILE \
+// --clientauth --certfile $CORE_PEER_TLS_CERT_FILE --keyfile $CORE_PEER_TLS_KEY_FILE
+// pushd $PWD/artifacts/configtx
+// configtxgen -inspectChannelCreateTx magnetocorp-channel.tx > magnetocorp-channel-info.json
+// popd
+ */
+const setup = () => {
+	let commands = [
+		`peer channel create` +
+		` -c magnetocorp-channel` +
+		` -o 127.0.0.1:7050` +
+		` -f ${ARTIFACTS_CONFIGTX_CHANNEL_TX}` +
+		` --outputBlock ${ARTIFACTS.GENESIS_BLOCK}` +
+		` --tls --cafile ${CERTIFICATES.ORDERER_TLS_ROOTCERT_FILE}` +
+		` --clientauth --certfile ${CERTIFICATES.CORE_PEER_TLS_CERT_FILE}` +
+		` --keyfile ${CERTIFICATES.CORE_PEER_TLS_KEY_FILE}`,
+		`configtxgen -inspectBlock ${ARTIFACTS.GENESIS_BLOCK}`,
+	];
+
+	try {
+		runCommands(commands.slice(0, 1));
+
+		const writeStream = fs.createWriteStream(ARTIFACTS.GENESIS_BLOCK_INFO);
+		writeStream.on('open', () => {
+			runCommands(commands.slice(1), ['inherit', writeStream, 'inherit']);
+			writeStream.close();
+		});
+
+		console.log('Artifacts generated');
+	} catch (err) {
+		console.log(err);
+	}
+};
+
+/**
+// # Cleaning up the orderer genesis block and its inspection
+ */
+const clean = () => {
+	try {
+		cleanFiles(Object.values(ARTIFACTS));
+		console.log('Artifacts cleaned');
+	} catch (err) {
+		console.log(err);
+	}
+};
+
+main();

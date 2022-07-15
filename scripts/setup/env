@@ -1,0 +1,4 @@
+export PROJECT_ROOT=/home/noman1001/Projects/PaperNet
+
+# FABRIC PATH FOR CONFIGURATION FILES
+export FABRIC_CFG_PATH=$PROJECT_ROOT/configs

@@ -17,22 +17,15 @@ const main = () => {
 	}
 };
 
-const ARTIFACTS_ORDERER = path.join(
+const ARTIFACTS_PEER = path.join(
 	PATHS.ARTIFACTS,
-	'orderers/',
+	'peers/',
 	'magnetocorp.com/',
-	'orderer.magnetocorp.com/'
+	'magnetocorp-dev-peer/'
 );
 
-/**
-// # Generate the orderer genesis block and its inspection
-// configtxgen -configPath $PWD/configs/configtx -outputCreateChannelTx $PWD/artifacts/configtx/magnetocorp-channel.tx -profile MagnetoCorpChannel -channelID magnetocorp-channel
-// pushd $PWD/artifacts/configtx
-// configtxgen -inspectChannelCreateTx magnetocorp-channel.tx > magnetocorp-channel-info.json
-// popd
- */
 const setup = () => {
-	let commands = [`orderer start`];
+	let commands = [`peer node start`];
 
 	try {
 		runCommands(commands);
@@ -46,7 +39,7 @@ const setup = () => {
  */
 const clean = () => {
 	try {
-		cleanFiles([ARTIFACTS_ORDERER]);
+		cleanFiles([ARTIFACTS_PEER]);
 		console.log('Artifacts cleaned');
 	} catch (err) {
 		console.log(err);

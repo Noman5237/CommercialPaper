@@ -1,0 +1,577 @@
+###############################################################################
+#
+#    Peer section
+#
+###############################################################################
+peer:
+  id: MagnetoCorp
+  networkId: dev
+
+  # The Address at local network interface this Peer will listen on.
+  # By default, it will listen on all network interfaces
+  listenAddress: magnetocorp-dev-peer:7051
+
+  # When used as peer config, this represents the endpoint to other peers
+  # in the same organization. For peers in other organization, see
+  # gossip.externalEndpoint for more info.
+  # When used as CLI config, this means the peer's endpoint to interact with
+  address: magnetocorp-dev-peer:7051
+
+  gateway:
+    enabled: true
+    # endorsementTimeout is the duration the gateway waits for a response
+    # from other endorsing peers before returning a timeout error to the client.
+    endorsementTimeout: 30s
+    # dialTimeout is the duration the gateway waits for a connection
+    # to other network nodes.
+    dialTimeout: 2m
+
+  # Keepalive settings for peer server and clients
+  keepalive:
+    interval: 7200s
+    timeout: 20s
+    minInterval: 60s
+    # Client keepalive settings for communicating with other peer nodes
+    client:
+      interval: 60s
+      timeout: 20s
+    # DeliveryClient keepalive settings for communication with ordering nodes.
+    deliveryClient:
+      interval: 60s
+      timeout: 20s
+
+  gossip:
+    # Important: The endpoints here have to be endpoints of peers in the same
+    # organization, because the peer would refuse connecting to these endpoints
+    # unless they are in the same organization as the peer.
+    bootstrap: 127.0.0.1:7051
+
+    useLeaderElection: false
+    orgLeader: true
+    membershipTrackerInterval: 5s
+    maxBlockCountToStore: 10
+    maxPropagationBurstLatency: 10ms
+    maxPropagationBurstSize: 10
+    propagateIterations: 1
+    propagatePeerNum: 3
+
+    # Must be greater than digestWaitTime + responseWaitTime
+    pullInterval: 4s
+
+    pullPeerNum: 3
+    requestStateInfoInterval: 4s
+    publishStateInfoInterval: 4s
+    # Maximum time a stateInfo message is kept until expired
+    stateInfoRetentionInterval:
+    # Time from startup certificates are included in Alive messages(unit: second)
+    publishCertPeriod: 10s
+
+    # Should we skip verifying block messages or not (currently not in use)
+    skipBlockVerification: false
+
+    dialTimeout: 3s
+    connTimeout: 2s
+    recvBuffSize: 20
+    sendBuffSize: 200
+
+    # Should be slightly smaller than requestWaitTime
+    digestWaitTime: 1s
+
+    # Time to wait before pull engine removes incoming nonce (unit: milliseconds)
+    # Should be slightly bigger than digestWaitTime
+    requestWaitTime: 1500ms
+    responseWaitTime: 2s
+    aliveTimeInterval: 5s
+    aliveExpirationTimeout: 25s
+    reconnectInterval: 25s
+    maxConnectionAttempts: 120
+
+    # Message expiration factor for alive messages
+    msgExpirationFactor: 20
+
+    # Leader election service configuration
+    election:
+      # Longest time peer waits for stable membership during leader election startup (unit: second)
+      startupGracePeriod: 15s
+
+      # Interval gossip membership samples to check its stability (unit: second)
+      membershipSampleInterval: 1s
+
+      leaderAliveThreshold: 10s
+      leaderElectionDuration: 5s
+
+    pvtData:
+      # pullRetryThreshold determines the maximum duration of time private data corresponding for a given block
+      # would be attempted to be pulled from peers until the block would be committed without the private data
+      pullRetryThreshold: 60s
+      # As private data enters the transient store, it is associated with the peer's ledger's height at that time.
+      # transientstoreMaxBlockRetention defines the maximum difference between the current ledger's height upon commit,
+      # and the private data residing inside the transient store that is guaranteed not to be purged.
+      # Private data is purged from the transient store when blocks with sequences that are multiples
+      # of transientstoreMaxBlockRetention are committed.
+      transientstoreMaxBlockRetention: 1000
+      # pushAckTimeout is the maximum time to wait for an acknowledgement from each peer
+      # at private data push at endorsement time.
+      pushAckTimeout: 3s
+      # Block to live pulling margin, used as a buffer
+      # to prevent peer from trying to pull private data
+      # from peers that is soon to be purged in next N blocks.
+      # This helps a newly joined peer catch up to current
+      # blockchain height quicker.
+      btlPullMargin: 10
+      # the process of reconciliation is done in an endless loop, while in each iteration reconciler tries to
+      # pull from the other peers the most recent missing blocks with a maximum batch size limitation.
+      # reconcileBatchSize determines the maximum batch size of missing private data that will be reconciled in a
+      # single iteration.
+      reconcileBatchSize: 10
+      # reconcileSleepInterval determines the time reconciler sleeps from end of an iteration until the beginning
+      # of the next reconciliation iteration.
+      reconcileSleepInterval: 1m
+      # reconciliationEnabled is a flag that indicates whether private data reconciliation is enable or not.
+      reconciliationEnabled: true
+      # skipPullingInvalidTransactionsDuringCommit is a flag that indicates whether pulling of invalid
+      # transaction's private data from other peers need to be skipped during the commit time and pulled
+      # only through reconciler.
+      skipPullingInvalidTransactionsDuringCommit: false
+      # implicitCollectionDisseminationPolicy specifies the dissemination  policy for the peer's own implicit collection.
+      # When a peer endorses a proposal that writes to its own implicit collection, below values override the default values
+      # for disseminating private data.
+      # Note that it is applicable to all channels the peer has joined. The implication is that requiredPeerCount has to
+      # be smaller than the number of peers in a channel that has the lowest numbers of peers from the organization.
+      implicitCollectionDisseminationPolicy:
+        # requiredPeerCount defines the minimum number of eligible peers to which the peer must successfully
+        # disseminate private data for its own implicit collection during endorsement. Default value is 0.
+        requiredPeerCount: 0
+        # maxPeerCount defines the maximum number of eligible peers to which the peer will attempt to
+        # disseminate private data for its own implicit collection during endorsement. Default value is 1.
+        maxPeerCount: 1
+
+    # Gossip state transfer related configuration
+    state:
+      # indicates whenever state transfer is enabled or not
+      # default value is false, i.e. state transfer is active
+      # and takes care to sync up missing blocks allowing
+      # lagging peer to catch up to speed with rest network.
+      enabled: true
+
+      checkInterval: 10s
+      responseTimeout: 3s
+      batchSize: 10
+      blockBufferSize: 20
+      maxRetries: 3
+
+  tls:
+    enabled: true
+    clientAuthRequired: true
+    cert:
+      file: ../artifacts/crypto-config/peerOrganizations/magnetocorp.com/peers/magnetocorp-dev-peer/tls/server.crt
+    key:
+      file: ../artifacts/crypto-config/peerOrganizations/magnetocorp.com/peers/magnetocorp-dev-peer/tls/server.key
+    rootcert:
+      file: ../artifacts/crypto-config/peerOrganizations/magnetocorp.com/peers/magnetocorp-dev-peer/tls/ca.crt
+    clientRootCAs:
+      files:
+        - ../artifacts/crypto-config/ordererOrganizations/magnetocorp.com/msp/tlscacerts/tlsca.magnetocorp.com-cert.pem
+        - ../artifacts/crypto-config/peerOrganizations/digibank.com/msp/tlscacerts/tlsca.digibank.com-cert.pem
+        - ../artifacts/crypto-config/peerOrganizations/magnetocorp.com/msp/tlscacerts/tlsca.magnetocorp.com-cert.pem
+    clientKey:
+      file: ../artifacts/crypto-config/peerOrganizations/magnetocorp.com/peers/magnetocorp-dev-peer/tls/server.key
+    clientCert:
+      file: ../artifacts/crypto-config/peerOrganizations/magnetocorp.com/peers/magnetocorp-dev-peer/tls/server.crt
+
+  authentication:
+    timewindow: 15m
+
+  # Path on the file system where peer will store data (eg ledger). This
+  # location must be access control protected to prevent unintended
+  # modification that might corrupt the peer operations.
+  fileSystemPath: ../artifacts/peers/magnetocorp.com/magnetocorp-dev-peer/ledger
+
+  BCCSP:
+    Default: SW
+    SW:
+      Hash: SHA2
+      Security: 256
+      FileKeyStore:
+        KeyStore:
+
+  mspConfigPath: ../artifacts/crypto-config/peerOrganizations/magnetocorp.com/peers/magnetocorp-dev-peer/msp
+  localMspId: MagnetoCorpMSP
+
+  # CLI common client config options
+  client:
+    connTimeout: 3s
+
+  # Delivery service related config
+  deliveryclient:
+    # Enables this peer to disseminate blocks it pulled from the ordering service
+    # via gossip.
+    # Note that 'gossip.state.enabled' controls point to point block replication
+    # of blocks committed in the past.
+    blockGossipEnabled: true
+
+    # It sets the total time the delivery service may spend in reconnection
+    # attempts until its retry logic gives up and returns an error
+    reconnectTotalTimeThreshold: 3600s
+
+    # It sets the delivery service <-> ordering service node connection timeout
+    connTimeout: 3s
+
+    # It sets the delivery service maximal delay between consecutive retries
+    reConnectBackoffThreshold: 3600s
+
+    # A list of orderer endpoint addresses which should be overridden
+    # when found in channel configurations.
+    addressOverrides:
+
+  # Type for the local MSP - by default it's of type bccsp
+  localMspType: bccsp
+
+  # Used with Go profiling tools only in none production environment. In
+  # production, it should be disabled (eg enabled: false)
+  profile:
+    enabled: false
+    listenAddress: 0.0.0.0:6060
+
+  # TODO: Need to understand the purpose of this config option.
+  # Handlers defines custom handlers that can filter and mutate
+  # objects passing within the peer, such as:
+  #   Auth filter - reject or forward proposals from clients
+  #   Decorators  - append or mutate the chaincode input passed to the chaincode
+  #   Endorsers   - Custom signing over proposal response payload and its mutation
+  # Valid handler definition contains:
+  #   - A name which is a factory method name defined in
+  #     core/handlers/library/library.go for statically compiled handlers
+  #   - library path to shared object binary for pluggable filters
+  # Auth filters and decorators are chained and executed in the order that
+  # they are defined. For example:
+  # authFilters:
+  #   -
+  #     name: FilterOne
+  #     library: /opt/lib/filter.so
+  #   -
+  #     name: FilterTwo
+  # decorators:
+  #   -
+  #     name: DecoratorOne
+  #   -
+  #     name: DecoratorTwo
+  #     library: /opt/lib/decorator.so
+  # Endorsers are configured as a map that its keys are the endorsement system chaincodes that are being overridden.
+  # Below is an example that overrides the default ESCC and uses an endorsement plugin that has the same functionality
+  # as the default ESCC.
+  # If the 'library' property is missing, the name is used as the constructor method in the builtin library similar
+  # to auth filters and decorators.
+  # endorsers:
+  #   escc:
+  #     name: DefaultESCC
+  #     library: /etc/hyperledger/fabric/plugin/escc.so
+  handlers:
+    authFilters:
+      - name: DefaultAuth
+      - name: ExpirationCheck # This filter checks identity x509 certificate expiration
+    decorators:
+      - name: DefaultDecorator
+    endorsers:
+      escc:
+        name: DefaultEndorsement
+        library:
+    validators:
+      vscc:
+        name: DefaultValidation
+        library:
+        # library: /etc/hyperledger/fabric/plugin/escc.so
+
+  # Number of goroutines that will execute transaction validation in parallel.
+  # By default, the peer chooses the number of CPUs on the machine. Set this
+  # variable to override that choice.
+  # NOTE: overriding this value might negatively influence the performance of
+  # the peer so please change this value only if you know what you're doing
+  validatorPoolSize:
+
+  # The discovery service is used by clients to query information about peers,
+  # such as - which peers have joined a certain channel, what is the latest
+  # channel config, and most importantly - given a chaincode and a channel,
+  # what possible sets of peers satisfy the endorsement policy.
+  discovery:
+    enabled: true
+    # Whether the authentication cache is enabled or not.
+    authCacheEnabled: true
+    # The maximum size of the cache, after which a purge takes place
+    authCacheMaxSize: 1000
+    # The proportion (0 to 1) of entries that remain in the cache after the cache is purged due to overpopulation
+    authCachePurgeRetentionRatio: 0.75
+    # Whether to allow non-admins to perform non channel scoped queries.
+    # When this is false, it means that only peer admins can perform non channel scoped queries.
+    orgMembersAllowedAccess: false
+
+  # Limits is used to configure some internal resource limits.
+  limits:
+    # Concurrency limits the number of concurrently running requests to a service on each peer.
+    # Currently this option is only applied to endorser service and deliver service.
+    # When the property is missing or the value is 0, the concurrency limit is disabled for the service.
+    concurrency:
+      # endorserService limits concurrent requests to endorser service that handles chaincode deployment, query and invocation,
+      # including both user chaincodes and system chaincodes.
+      endorserService: 2500
+      # deliverService limits concurrent event listeners registered to deliver service for blocks and transaction events.
+      deliverService: 2500
+      # gatewayService limits concurrent requests to gateway service that handles the submission and evaluation of transactions.
+      gatewayService: 500
+
+  # Since all nodes should be consistent it is recommended to keep
+  # the default value of 100MB for MaxRecvMsgSize & MaxSendMsgSize
+  # Max message size in bytes GRPC server and client can receive
+  maxRecvMsgSize: 47185920
+  # Max message size in bytes GRPC server and client can send
+  maxSendMsgSize: 47185920
+
+###############################################################################
+#
+#    VM section
+#
+###############################################################################
+vm:
+
+    # Endpoint of the vm management system.  For docker can be one of the following in general
+    # unix:///var/run/docker.sock
+    # http://localhost:2375
+    # https://localhost:2376
+    # If you utilize external chaincode builders and don't need the default Docker chaincode builder,
+    # the endpoint should be unconfigured so that the peer's Docker health checker doesn't get registered.
+    endpoint: unix:///var/run/docker.sock
+
+    # settings for docker vms
+    docker:
+        tls:
+            enabled: false
+            ca:
+                file: docker/ca.crt
+            cert:
+                file: docker/tls.crt
+            key:
+                file: docker/tls.key
+
+        # Enables/disables the standard out/err from chaincode containers for
+        # debugging purposes
+        attachStdout: true
+
+        # Parameters on creating docker container.
+        # Container may be efficiently created using ipam & dns-server for cluster
+        # NetworkMode - sets the networking mode for the container. Supported
+        # standard values are: `host`(default),`bridge`,`ipvlan`,`none`.
+        # Dns - a list of DNS servers for the container to use.
+        # Note:  `Privileged` `Binds` `Links` and `PortBindings` properties of
+        # Docker Host Config are not supported and will not be used if set.
+        # LogConfig - sets the logging driver (Type) and related options
+        # (Config) for Docker. For more info,
+        # https://docs.docker.com/engine/admin/logging/overview/
+        # Note: Set LogConfig using Environment Variables is not supported.
+        hostConfig:
+            NetworkMode: host
+            Dns:
+               # - 192.168.0.1
+            LogConfig:
+                Type: json-file
+                Config:
+                    max-size: "50m"
+                    max-file: "5"
+            Memory: 2147483648
+
+###############################################################################
+#
+#    Chaincode section
+#
+###############################################################################
+chaincode:
+  # The id is used by the Chaincode stub to register the executing Chaincode
+  # ID with the Peer and is generally supplied through ENV variables
+  # the `path` form of ID is provided when installing the chaincode.
+  # The `name` is used for all other requests and can be any string.
+  id:
+    path:
+    name:
+
+  # Generic builder environment, suitable for most chaincode types
+  builder: $(DOCKER_NS)/fabric-ccenv:$(TWO_DIGIT_VERSION)
+
+  # Enables/disables force pulling of the base docker images (listed below)
+  # during user chaincode instantiation.
+  # Useful when using moving image tags (such as :latest)
+  pull: false
+
+  golang:
+    # golang will never need more than baseos
+    runtime: $(DOCKER_NS)/fabric-baseos:$(TWO_DIGIT_VERSION)
+
+    # whether or not golang chaincode should be linked dynamically
+    dynamicLink: false
+
+  java:
+    # This is an image based on java:openjdk-8 with addition compiler
+    # tools added for java shim layer packaging.
+    # This image is packed with shim layer libraries that are necessary
+    # for Java chaincode runtime.
+    runtime: $(DOCKER_NS)/fabric-javaenv:$(TWO_DIGIT_VERSION)
+
+  node:
+    # This is an image based on node:$(NODE_VER)-alpine
+    runtime: $(DOCKER_NS)/fabric-nodeenv:$(TWO_DIGIT_VERSION)
+
+  # List of directories to treat as external builders and launchers for
+  # chaincode. The external builder detection processing will iterate over the
+  # builders in the order specified below.
+  # If you don't need to fallback to the default Docker builder, also unconfigure vm.endpoint above.
+  # To override this property via env variable use CORE_CHAINCODE_EXTERNALBUILDERS: [{name: x, path: dir1}, {name: y, path: dir2}]
+  externalBuilders:
+    - name: ccaas_builder
+      path: /opt/hyperledger/ccaas_builder
+      propagateEnvironment:
+        - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG
+
+  installTimeout: 300s
+  startuptimeout: 300s
+
+  # Timeout duration for Invoke and Init calls to prevent runaway.
+  # This timeout is used by all chaincodes in all the channels, including
+  # system chaincodes.
+  # Note that during Invoke, if the image is not available (e.g. being
+  # cleaned up when in development environment), the peer will automatically
+  # build the image, which might take more time. In production environment,
+  # the chaincode image is unlikely to be deleted, so the timeout could be
+  # reduced accordingly.
+  executetimeout: 30s
+
+  # There are 2 modes: "dev" and "net".
+  # In dev mode, user runs the chaincode after starting peer from
+  # command line on local machine.
+  # In net mode, peer will run chaincode in a docker container.
+  mode: net
+
+  # keepalive in seconds. In situations where the communication goes through a
+  # proxy that does not support keep-alive, this parameter will maintain connection
+  # between peer and chaincode.
+  # A value <= 0 turns keepalive off
+  keepalive: 0
+
+  # enabled system chaincodes
+  system:
+    _lifecycle: enable
+    cscc: enable
+    lscc: enable
+    qscc: enable
+
+  logging:
+    level: debug
+    shim: debug
+    format: '%{color}%{time:2006-01-02 15:04:05.000 MST} [%{module}] %{shortfunc} -> %{level:.4s} %{id:03x}%{color:reset} %{message}'
+
+###############################################################################
+#
+#    Ledger section - ledger configuration encompasses both the blockchain
+#    and the state
+#
+###############################################################################
+ledger:
+  blockchain:
+
+  state:
+    stateDatabase: CouchDB
+    totalQueryLimit: 100000
+    couchDBConfig:
+      # It is recommended to run CouchDB on the same server as the peer, and
+      # not map the CouchDB container port to a server port in docker-compose.
+      # Otherwise proper security must be provided on the connection between
+      # CouchDB client (on the peer) and server.
+      couchDBAddress: 127.0.0.1:5984
+
+      # The credentials are recommended to pass as an environment variable
+      # during start up (eg CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD).
+      # If it is stored here, the file must be access control protected
+      # to prevent unintended users from discovering the password.
+      username: admin
+      password: adminpw
+
+      maxRetries: 3
+      maxRetriesOnStartup: 10
+      requestTimeout: 35s
+
+      # Limit on the number of records per each CouchDB query
+      # Note that chaincode queries are only bound by totalQueryLimit.
+      # Internally the chaincode may execute multiple CouchDB queries,
+      # each of size internalQueryLimit.
+      internalQueryLimit: 1000
+
+      # Limit on the number of records per CouchDB bulk update batch
+      maxBatchUpdateSize: 1000
+
+      # Create the _global_changes system database
+      # This is optional.  Creating the global changes database will require
+      # additional system resources to track changes and maintain the database
+      createGlobalChangesDB: false
+
+      # CacheSize denotes the maximum mega bytes (MB) to be allocated for the in-memory state
+      # cache. Note that CacheSize needs to be a multiple of 32 MB. If it is not a multiple
+      # of 32 MB, the peer would round the size to the next multiple of 32 MB.
+      # To disable the cache, 0 MB needs to be assigned to the cacheSize.
+      cacheSize: 64
+
+  history:
+    # enableHistoryDatabase - options are true or false
+    # Indicates if the history of key updates should be stored.
+    # All history 'index' will be stored in goleveldb, regardless if using
+    # CouchDB or alternate database for the state.
+    enableHistoryDatabase: true
+
+  pvtdataStore:
+    # the maximum db batch size for converting
+    # the ineligible missing data entries to eligible missing data entries
+    collElgProcMaxDbBatchSize: 5000
+    # the minimum duration (in milliseconds) between writing
+    # two consecutive db batches for converting the ineligible missing data entries to eligible missing data entries
+    collElgProcDbBatchesInterval: 1000
+    # The missing data entries are classified into two categories:
+    # (1) prioritized
+    # (2) deprioritized
+    # Initially, all missing data are in the prioritized list. When the
+    # reconciler is unable to fetch the missing data from other peers,
+    # the unreconciled missing data would be moved to the deprioritized list.
+    # The reconciler would retry deprioritized missing data after every
+    # deprioritizedDataReconcilerInterval (unit: minutes). Note that the
+    # interval needs to be greater than the reconcileSleepInterval
+    deprioritizedDataReconcilerInterval: 60m
+
+  snapshots:
+    # Path on the file system where peer will store ledger snapshots
+    rootDir: /home/noman1001/Projects/PaperNet/artifacts/peers/magnetocorp.com/magnetocorp-dev-peer/ledger/snapshots
+
+###############################################################################
+#
+#    Operations section
+#
+###############################################################################
+operations:
+  listenAddress: 127.0.0.1:9443
+
+  tls:
+    enabled: true
+    cert:
+      file: ../artifacts/crypto-config/peerOrganizations/magnetocorp.com/peers/magnetocorp-dev-peer/tls/server.crt
+    key:
+      file: ../artifacts/crypto-config/peerOrganizations/magnetocorp.com/peers/magnetocorp-dev-peer/tls/server.key
+
+    clientAuthRequired: true
+    clientRootCAs:
+      files:
+        - ../artifacts/crypto-config/ordererOrganizations/magnetocorp.com/msp/tlscacerts/tlsca.magnetocorp.com-cert.pem
+        - ../artifacts/crypto-config/peerOrganizations/digibank.com/msp/tlscacerts/tlsca.digibank.com-cert.pem
+        - ../artifacts/crypto-config/peerOrganizations/magnetocorp.com/msp/tlscacerts/tlsca.magnetocorp.com-cert.pem
+
+###############################################################################
+#
+#    Metrics section
+#
+###############################################################################
+metrics:
+  # metrics provider is one of statsd, prometheus, or disabled
+  provider: prometheus
