@@ -1,0 +1,79 @@
+#!/usr/bin/node
+
+const path = require('path');
+const { Command } = require('commander');
+const { runCommands, cleanFiles, PATHS } = require('./utils.js');
+
+const main = () => {
+	const program = new Command();
+
+	program.option('-c --clean', 'cleans the output of this script');
+	program.argument(
+		'<package-location>',
+		'the location of the package to install'
+	);
+	program.parse(process.argv);
+
+	const packageLocation = program.args[0];
+	const chainCodeConfigPath = path.join(
+		PATHS.PROJECT,
+		packageLocation,
+		'chaincode.json'
+	);
+	const config = require(chainCodeConfigPath);
+	config.path = packageLocation;
+	const label = `${config.name}-${config.version}-${config.orgVersion}`;
+	config.label = label;
+	ARTIFACTS.PACKAGES_PAPERNET = path.join(
+		ARTIFACTS_PACKAGES,
+		`${label}.tar.gz`
+	);
+
+	if (program.opts().clean) {
+		clean();
+	} else {
+		setup(config);
+	}
+};
+
+const ARTIFACTS_PACKAGES = path.join(PATHS.ARTIFACTS, '/packages');
+const ARTIFACTS = {
+	PACKAGES_PAPERNET: '',
+};
+
+/**
+// # Generate the chaincode package 
+// peer lifecycle chaincode package ${PACKAGES_PAPERNET} \
+// --label ${label} \
+// -l ${config.lang} \
+// -p ${config.path} \
+ */
+const setup = (config) => {
+	let commands = [
+		`peer lifecycle chaincode package ${ARTIFACTS.PACKAGES_PAPERNET}` +
+			` --label ${config.label}` +
+			` -l ${config.lang}` +
+			` -p ${config.path}`,
+	];
+
+	try {
+		runCommands(commands);
+		console.log('Artifacts generated');
+	} catch (err) {
+		console.log(err);
+	}
+};
+
+/**
+// # Cleaning up the packages
+*/
+const clean = () => {
+	try {
+		cleanFiles(Object.values(ARTIFACTS));
+		console.log('Artifacts cleaned');
+	} catch (err) {
+		console.log(err);
+	}
+};
+
+main();

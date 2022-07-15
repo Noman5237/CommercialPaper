@@ -1,0 +1,2 @@
+peer lifecycle chaincode install ./artifacts/packages/PaperNet-0.1.0-0.1.0.tar.gz
+peer lifecycle chaincode queryinstalled

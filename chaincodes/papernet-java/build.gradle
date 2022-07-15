@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'io.freefair.lombok' version '6.5.0-rc1'
+    id 'com.github.johnrengelman.shadow' version '5.1.0'
 }
 
 group 'org.papernet'
@@ -24,4 +25,19 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+shadowJar {
+    baseName = 'chaincode'
+    version = null
+    classifier = null
+
+    manifest {
+        attributes 'Main-Class': 'org.hyperledger.fabric.contract.ContractRouter'
+    }
+}
+
+
+tasks.withType(JavaCompile) {
+  options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation" << "-parameters"
 }
