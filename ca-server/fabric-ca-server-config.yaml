@@ -315,14 +315,15 @@ csr:
      algo: ecdsa
      size: 256
    names:
-      - C: US
-        ST: "North Carolina"
-        L:
-        O: Hyperledger
-        OU: Fabric
+      - C: BD
+        ST: "Dhaka"
+        L: "Mohakhali"
+        O: BrainStation23
+        OU: certauth
    hosts:
      - bs249
      - localhost
+     - brainstation23.com
    ca:
       expiry: 131400h
       pathlength: 1
