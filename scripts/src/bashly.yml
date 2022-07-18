@@ -3,9 +3,6 @@ help: PaperNet scripts
 version: 0.1.0
 
 environment_variables:
-  - name: FABRIC_CA_SERVER_HOME
-    help: Location of the fabric CA server home directory
-    required: true
 
 commands:
   - name: completions
@@ -13,7 +10,7 @@ commands:
       Generate bash completions
       Usage: eval "\$(papernet completions)"
 
-  - name: ca-server
+  - name: root-ca-server
     help: Reload ca server with current configuration
 
     dependencies:
@@ -32,3 +29,6 @@ commands:
       - papernet ca-cerver start
 
     environment_variables:
+      - name: FABRIC_CA_SERVER_HOME
+        help: Location of the fabric CA server home directory
+        required: true

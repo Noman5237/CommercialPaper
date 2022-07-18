@@ -34,8 +34,8 @@ papernet_usage() {
   echo
   # :command.usage_commands
   printf "Commands:\n"
-  echo "  completions   Generate bash completions"
-  echo "  ca-server     Reload ca server with current configuration"
+  echo "  completions      Generate bash completions"
+  echo "  root-ca-server   Reload ca server with current configuration"
   echo
 
   if [[ -n $long_usage ]]; then
@@ -46,14 +46,6 @@ papernet_usage() {
     echo
     echo "  --version, -v"
     printf "    Show version number\n"
-    echo
-
-    # :command.usage_environment_variables
-    printf "Environment Variables:\n"
-
-    # :environment_variable.usage
-    echo "  FABRIC_CA_SERVER_HOME (required)"
-    printf "    Location of the fabric CA server home directory\n"
     echo
 
   fi
@@ -90,20 +82,20 @@ papernet_completions_usage() {
 }
 
 # :command.usage
-papernet_ca_server_usage() {
+papernet_root_ca_server_usage() {
   if [[ -n $long_usage ]]; then
-    printf "papernet ca-server - Reload ca server with current configuration\n"
+    printf "papernet root-ca-server - Reload ca server with current configuration\n"
     echo
 
   else
-    printf "papernet ca-server - Reload ca server with current configuration\n"
+    printf "papernet root-ca-server - Reload ca server with current configuration\n"
     echo
 
   fi
 
   printf "Usage:\n"
-  printf "  papernet ca-server ACTION\n"
-  printf "  papernet ca-server --help | -h\n"
+  printf "  papernet root-ca-server ACTION\n"
+  printf "  papernet root-ca-server --help | -h\n"
   echo
 
   if [[ -n $long_usage ]]; then
@@ -121,7 +113,13 @@ papernet_ca_server_usage() {
     printf "    Initialize or start the ca server\n"
     printf "    Allowed: init, start\n"
     echo
+    # :command.usage_environment_variables
+    printf "Environment Variables:\n"
 
+    # :environment_variable.usage
+    echo "  FABRIC_CA_SERVER_HOME (required)"
+    printf "    Location of the fabric CA server home directory\n"
+    echo
     # :command.usage_examples
     printf "Examples:\n"
 
@@ -177,7 +175,7 @@ inspect_args() {
 }
 
 # :command.user_lib
-# src/lib/send_completions.sh
+# /home/noman1001/Projects/PaperNet/scripts/src/lib/send_completions.sh
 send_completions() {
   echo $'# papernet completion                                      -*- shell-script -*-'
   echo $''
@@ -190,16 +188,16 @@ send_completions() {
   echo $'  local compline="${COMP_WORDS[@]:1:$COMP_CWORD-1}"'
   echo $''
   echo $'  case "$compline" in'
+  echo $'    \'root-ca-server\'*)'
+  echo $'      while read; do COMPREPLY+=( "$REPLY" ); done < <( compgen -W "--help -h init start" -- "$cur" )'
+  echo $'      ;;'
+  echo $''
   echo $'    \'completions\'*)'
   echo $'      while read; do COMPREPLY+=( "$REPLY" ); done < <( compgen -W "--help -h" -- "$cur" )'
   echo $'      ;;'
   echo $''
-  echo $'    \'ca-server\'*)'
-  echo $'      while read; do COMPREPLY+=( "$REPLY" ); done < <( compgen -W "--help -h init start" -- "$cur" )'
-  echo $'      ;;'
-  echo $''
   echo $'    *)'
-  echo $'      while read; do COMPREPLY+=( "$REPLY" ); done < <( compgen -W "--help --version -h -v ca-server completions" -- "$cur" )'
+  echo $'      while read; do COMPREPLY+=( "$REPLY" ); done < <( compgen -W "--help --version -h -v completions root-ca-server" -- "$cur" )'
   echo $'      ;;'
   echo $''
   echo $'  esac'
@@ -212,7 +210,7 @@ send_completions() {
 # :command.command_functions
 # :command.function
 papernet_completions_command() {
-  # src/completions_command.sh
+  # /home/noman1001/Projects/PaperNet/scripts/src/completions_command.sh
   # Call the `send_completions` function which was added by running:
   #
   #   $ bashly add comp function
@@ -225,8 +223,8 @@ papernet_completions_command() {
 }
 
 # :command.function
-papernet_ca_server_command() {
-  # src/ca_server_command.sh
+papernet_root_ca_server_command() {
+  # /home/noman1001/Projects/PaperNet/scripts/src/root_ca_server_command.sh
 
   # inspect_args
   # delete all files in the $FABRIC_CA_SERVER_HOME directory except fabric-ca-server-config.yaml
@@ -253,10 +251,6 @@ parse_requirements() {
 
   esac
   # :command.environment_variables_filter
-  if [[ -z "${FABRIC_CA_SERVER_HOME:-}" ]]; then
-    printf "missing required environment variable: FABRIC_CA_SERVER_HOME\n"
-    exit 1
-  fi
   # :command.dependencies_filter
   # :command.command_filter
   action=${1:-}
@@ -272,10 +266,10 @@ parse_requirements() {
     shift $#
     ;;
 
-  ca-server )
-    action="ca-server"
+  root-ca-server )
+    action="root-ca-server"
     shift
-    papernet_ca_server_parse_requirements "$@"
+    papernet_root_ca_server_parse_requirements "$@"
     shift $#
     ;;
 
@@ -356,24 +350,28 @@ papernet_completions_parse_requirements() {
 }
 
 # :command.parse_requirements
-papernet_ca_server_parse_requirements() {
+papernet_root_ca_server_parse_requirements() {
   # :command.fixed_flags_filter
   case "${1:-}" in
   --help | -h )
     long_usage=yes
-    papernet_ca_server_usage
+    papernet_root_ca_server_usage
     exit
     ;;
 
   esac
   # :command.environment_variables_filter
+  if [[ -z "${FABRIC_CA_SERVER_HOME:-}" ]]; then
+    printf "missing required environment variable: FABRIC_CA_SERVER_HOME\n"
+    exit 1
+  fi
   # :command.dependencies_filter
   if ! [[ -x "$(command -v fabric-ca-server)" ]]; then
     printf "missing dependency: fabric-ca-server\n"
     exit 1
   fi
   # :command.command_filter
-  action="ca-server"
+  action="root-ca-server"
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
     key="$1"
@@ -401,7 +399,7 @@ papernet_ca_server_parse_requirements() {
   done
   # :command.required_args_filter
   if [[ -z ${args[action]+x} ]]; then
-    printf "missing required argument: ACTION\nusage: papernet ca-server ACTION\n"
+    printf "missing required argument: ACTION\nusage: papernet root-ca-server ACTION\n"
     exit 1
   fi
   # :command.required_flags_filter
@@ -421,7 +419,7 @@ initialize() {
   long_usage=''
   set -e
 
-  # src/initialize.sh
+  # /home/noman1001/Projects/PaperNet/scripts/src/initialize.sh
 }
 
 # :command.run
@@ -440,12 +438,12 @@ run() {
       papernet_completions_command
     fi
 
-  elif [[ $action == "ca-server" ]]; then
+  elif [[ $action == "root-ca-server" ]]; then
     if [[ ${args[--help]:-} ]]; then
       long_usage=yes
-      papernet_ca_server_usage
+      papernet_root_ca_server_usage
     else
-      papernet_ca_server_command
+      papernet_root_ca_server_command
     fi
 
   elif [[ $action == "root" ]]; then

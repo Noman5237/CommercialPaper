@@ -1,0 +1,2 @@
+export BASHLY_SOURCE_DIR=$PROJECT_ROOT/scripts/src
+export BASHLY_TARGET_DIR=$PROJECT_ROOT/bin
